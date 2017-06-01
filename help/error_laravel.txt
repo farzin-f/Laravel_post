@@ -1,0 +1,42 @@
+1.
+php artisan make:migration create_tasks_table --create=tasks
+error: failed to open stream: No such file or directory
+solution: composer dump-autoload
+
+2.
+phpMyAdmin AllowNoPassword:
+  - sudo emacs -nw /etc/phpmyadmin/config.inc.php
+  - uncomment this:
+    $cfg['Servers'][$i]['AllowNoPasswordRoot'] = true;
+
+3. Reading from DB:
+  error: htmlspecialchars() expects parameter 1 to be string, object given4 ...
+  That's because DB::table()->get() returns a JSON object. So we should define
+  the right field (e.g. task->body)
+
+4. Inside tinker:
+error: BadMethodCallException with message 'Call to undefined method
+Illuminate\Database\Query\Builder::incomplete()'
+soluction: exit tinker and reenter it
+
+5. CSRF:
+error: TokenMismatchException
+solution: include {{ csrf_field() }} inside form tag
+
+6. namespace problem:
+error: Class 'App\Http\Controllers\App\Post' not found
+solution: should use the right namespace; e.g. use App\Post;
+
+7. create()
+error: MassAssignmentException
+solution: that is because we didn't give permission the fields that are going
+to be filled inside create() method. We should use either fillable() or guarded()
+inside model class.
+
+8. General error, requested page not found, etc, restarts the server might fix it
+
+9. If nothing is stored in DB while the form has no error, be sure to include
+attribut name for your inputs inside form.
+
+10. attempt(): this method hashes the password by default	so if the password is
+stored in plaintext in server it would fail!

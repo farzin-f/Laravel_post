@@ -1,0 +1,201 @@
+1- Installation procedure:
+	- LAMP
+	- https://laravel.com/docs/5.4/installation
+	- composer manges php dependencies (composer.json)
+
+2- Start server: php artisan serve
+
+3- Database, MySql:
+	- Create a new user (mysql_laravel.txt);
+	- .env modifications:
+		DB_DATABASE=blog
+		DB_USERNAME=farzuntu
+		DB_PASSWORD=''
+	- databases in database/migrations
+
+4- View, resources/views:
+	- <?php echo $var; ?> = <?= $var; ?>
+	- In Laravel blade template engine:
+		- <?php ?> = @
+		- <?php echo $var; ?> = {{ $var }}
+
+5- php artisan make: file generators for models, mail class, ...
+	- php artisan help make:migration to get its manual
+
+6- php artisan make:migration:
+	- php artisan make:migration create_tasks_table (using the laravel database
+	naming convention)
+	- php artisan make:migration create_tasks_table --create=tasks : to create the
+	table (with a basic schema) and the migration file both
+	- make a mistake in table Schema:
+		- modify the table
+		- php artisan migrate:refresh
+
+7- Using phpMyAdmin as GUI for mysql server:
+	- Install phpMyAdmin
+	- phpMyAdmin config shoule be included inside apache2 config
+	- localhost/phpmyadmin
+	(in case of error look error_laravel.txt)
+
+8- DB query can be merged with any types of conditions, e.g.:
+	- DB::table('table_name')->where('condition')->get()
+
+9- Route::get('/{wildecard}')
+	- The compact() function get the key and returns its value; so that we can
+	have several keys as its arguments.
+
+10- dd(): die and dump
+
+11- routes/web:
+	- return view('tasks/index'); = return view('tasks.index');
+
+12- Models:
+	php artisan make:model Task : creates a model inside app/providers
+
+13- Eloquent makes it passible to have class form for queries
+	- php artisan tinker : Laravel shell to interact with the application,
+	- App\Task::all() : fetch all the tasks (App is the Task namespace)
+	- App\Task::where('id', '>', 2)->get(); get all the task with id > 2
+	- App\Task::pluck('body') : get only the field body of each task
+		-	App\Task::pluck('body')->first()
+
+14- use App\Task Include a namespace inside a model.
+
+15- php artisan make:model Task -m (make a model with migration)
+
+16- Adding task with tinker:
+	- $task = new App\Task;
+	- $task->body = 'Take shower'
+	- $task->save();
+
+17- App\Task::where('completed', 0)->get();
+We can use it directly inside tinker or we can define a method inside Task Model
+which gives the same result and call this method in tinker.
+If we want to merge the incomplete method with another condition we should define
+a scope method (the method name starts with scope) and we remove the get(); But we
+should call it within tinker.
+
+18- Controller, app/Http/Controllers:
+	- php artisan make:controller TasksController
+	- usually we define what should be done in a route inside a controller method
+
+19- Route model binding:
+	- route wildcard matches the controller method argument name which is of type
+	of the model (here Task);
+	- in this way Laravel automatically do a find('wildecard')
+
+20- General layout for HTML views: help us having a unit wrap for all our views
+	(no need the same css for each view, ...)
+	- we create a file layout.blade.php inside resources/views
+	- Then we use @yeild('content') which towards it we can direct every route
+	content view.
+	- The route's view should have @extends(layouts/master) at the top
+	- It's content should be held inside @section('content')...@endsection
+	- @include('layouts/nav'): to include an HTML code (navbar here) inside another
+	file (master layout here)
+
+21- php artisan make:model Post -mc : creates a model with its corresponding migration
+and controller
+
+22- CSRF (cross-site request forgery):
+	- preventing the unauthorized request from an unauthorized user
+	- {{ csrf_field() }} should be called for every form to make possible
+	token verification; laravel creates a token for each session and the compare
+	it to the one created from the form (csrf_field()). If they match everything's
+	safe. It translates like this inside HTML form:
+	<input type="hidden" name="_token" value="dar3sOcOzB2Kxm1ijhrh2OUtmMZKqNcZXpvTK8ia">
+	- every input tag should have a name if we want to submit them to the server
+	- if we're using create() (to give the values and save in the DB) we should
+	do the following to let it happen (inside model class, i.e. Post here):
+		- fillable() : fields that are permitted to get values
+		- guarded(): fields that are protected to be override; empty array means
+		we're not guarding anything
+	Instead we can override the Model class from which our models inherite (the
+	structure of Model should be exactly as it is mentioned inside app/providers/Model.php)
+
+
+\: helpful for root direction, to call a file from root; \App\Task
+
+23- php artisan make:controller TaskController -r : makes a resourceful controller;
+which means with all the method needed to create, update, delete, ... of an item:
+	- index -> GET /tasks
+	- create -> GET /tasks/create
+	- store -> POST /tasks
+	- show -> GET /tasks/id
+	- edit -> GET /tasks/id/edit
+	- update -> PATCH /tasks/id
+	- destroy -> DELETE /tasks/id
+
+24- Validation:
+	- Can be done inside controller and via $this->validate(request(),[rules])
+
+25- timestamp() field can be modified using the methods of Carbon library
+
+26- assets, sass (resources/assets):
+	- Laravel mix library to compile sass files (.sccs, .less, .vue, ...)
+		- e.g.: mix.sass('source_file', 'dest_file')
+	- They need npm install to manage the dependencies (package.json)
+	- npm run dev: to compile the sass files
+	- npm run watch: to compile live and automatically
+	- Bootstrap.js, require('axios'): it is an AJAX library
+
+27- Model relationship:
+	- Post: $this->hasMany(Comment::class) eq-> $this->hasMany('App\Comment')
+	- Comment: $this->belongsTo(Post::class) eq-> $this->belongsTo('App\Post')
+	- In this way we can relate each comment to a post like this: $post->comment
+
+
+28- If the browser does not support delete or patch we can send a normal post
+request as a form method and inside it we add the hidden input
+{{ method_field(delete) }} which is our intended request type.
+
+back(): redirect to the same page after submitting a form
+
+29- Http/Kernel.php: The default middlewares are stored here:
+	- protected $middleware: they are checked as soon as the php artisan serve
+	is run:
+		- CheckForMaintenanceMode: is verified whenever the site is deployed, if we
+		say php artisan down (the site is down for maintenance), Laravel will automatically
+		shows a page 'Be right back';
+
+	- protected $middlewareGroups:
+		- VerifyCsrfToken: responsible for csrf_field();
+
+	- protected $routeMiddleware:
+		- auth: to make it accessible a particular route to our subscribers;
+		e.g. if in a controller __construct we have $this->middleware('auth'),
+		the whole view related to this controller would be available only
+		for the members. We can limit it with
+		$this->middleware('auth', ['only','index']) or 'except' instead of 'only'
+ 		- can: does a user have permission to do a certain action
+		- guest: opposite of auth
+
+Database seeding: to restore the data back:
+https://laravel.com/docs/5.4/seeding
+
+30- to get the confirmation for an input type we should name it specifically so
+that Laravel validate() can verify it using 'confirmed'; example:
+<input type='text' name='password'>
+<input type='text' name='password_confirmation'>
+
+- save() vs create()
+	we should give every field needed as an array to create so that it construct
+	our new instance, while save() accept an object directly.
+
+31- Authentication:
+	- create signin/registration routes
+	- to create a user we have two options: User::create() and User::register()
+	- we can give a name to routes so they can be called with a method of the same
+	name
+	- logout can be post or get request. From the security point of view it should
+	be post to prevent others to link to this and log you out.
+	- $this->middleware('auth'): with this method inside the constructor of a controller
+	we specify that certain methods(create, store, ...) needs authentication to be
+	appear. So they won't be accessible for guests.
+	- Auth::check(), check if the user has signed in;
+	- middleware('guest'), when a user is signed in there is no need to view the login
+	page, that's why we use guest method inside the constructor of the SessionController
+	to show it onley to the guests
+	- attempt(): this method verify the needed fields with data on the server
+	to authenticate a user. Pay attention, this method hashes the password by default
+	so if the password is stored in plaintext in server it would fail!
